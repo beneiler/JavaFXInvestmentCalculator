@@ -1,0 +1,203 @@
+package investmentcalcfx;
+
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+public class InvestmentCalcFX extends Application {
+
+    Label lblInvest;
+    TextField txtPrpAmt, txtReturnRate, txtYears;
+    RadioButton radAnnually, radMonthly, radWeekly, radDaily;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage stage) {
+
+        stage.setTitle("Future Value of an Investment Calculator");
+        stage.setMaxWidth(1000);
+        stage.setMaxHeight(1000);
+
+        Label lblEnterPrincipal = new Label("Enter principal amount:");
+        txtPrpAmt = new TextField();
+
+        Label lblEnterRate = new Label("Enter expected rate of return (e.g., 8 for 8%):");
+        txtReturnRate = new TextField();
+
+        Label lblEnterTime = new Label("Enter number of years money will be invested:");
+        txtYears = new TextField();
+
+        GridPane htWtGrid = new GridPane();
+
+        htWtGrid.add(lblEnterPrincipal, 0, 0);
+        htWtGrid.add(txtPrpAmt, 1, 0);
+
+        htWtGrid.add(lblEnterRate, 0, 1);
+        htWtGrid.add(txtReturnRate, 1, 1);
+
+        htWtGrid.add(lblEnterTime, 0, 2);
+        htWtGrid.add(txtYears, 1, 2);
+
+        htWtGrid.setHgap(20);
+        htWtGrid.setVgap(10);
+
+        htWtGrid.setPadding(new Insets(20));
+
+        radAnnually = new RadioButton("Annually");
+        radMonthly = new RadioButton("Monthly");
+        radWeekly = new RadioButton("Weekly");
+        radDaily = new RadioButton("Daily");
+
+        HBox hboxActivity = new HBox(20, radAnnually, radMonthly, radWeekly, radDaily);
+
+        hboxActivity.setAlignment(Pos.CENTER);
+
+        TitledPane moneyPane = new TitledPane("How frequently will the interest be compounded?", hboxActivity);
+
+        moneyPane.setCollapsible(false);
+
+        lblInvest = new Label("");
+        
+
+        lblInvest.setMinHeight(35);
+        
+
+        VBox vboxResults = new VBox(0, lblInvest);
+        
+        vboxResults.setPadding(new Insets(5));
+
+        Button btnCalculate = new Button("Calculate");
+        btnCalculate.setMinWidth(150);
+        btnCalculate.setMinHeight(50);
+
+        btnCalculate.setOnAction(new btnCalculateClickHandler());
+
+        Button btnClear = new Button("Clear");
+        btnClear.setMinWidth(150);
+        btnClear.setMinHeight(50);
+
+        btnClear.setOnAction(new btnClearClickHandler());
+
+        Button btnExit = new Button("Exit");
+        btnExit.setMinWidth(150);
+        btnExit.setMinHeight(50);
+
+        btnExit.setOnAction(new btnExitClickHandler());
+
+        HBox buttonBox = new HBox(10, btnCalculate, btnClear, btnExit);
+
+        buttonBox.setAlignment(Pos.CENTER);
+
+        buttonBox.setPadding(new Insets(5));
+
+        VBox bigV = new VBox(0, htWtGrid, moneyPane, vboxResults, buttonBox);
+
+        bigV.setPadding(new Insets(10));
+
+        Image tree = new Image("file:moneytree.jpg");
+        ImageView imgViewTree = new ImageView(tree);
+
+        imgViewTree.setFitWidth(340);
+        imgViewTree.setPreserveRatio(true);
+
+        HBox picbox = new HBox(bigV, imgViewTree);
+        picbox.setAlignment(Pos.CENTER);
+        
+
+        Scene scene = new Scene(picbox);
+
+        stage.setScene(scene);
+
+        stage.show();
+    }
+
+    class btnCalculateClickHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            double principal = Double.parseDouble(txtPrpAmt.getText());
+            double rate = Double.parseDouble(txtReturnRate.getText());
+            double time = Double.parseDouble(txtYears.getText());
+
+            double futureValue = 0.0;
+
+            if (radAnnually.isSelected()) {
+                futureValue = calculateFutureValueAnnually(principal, rate, time);
+            } else if (radMonthly.isSelected()) {
+                futureValue = calculateFutureValueMonthly(principal, rate, time);
+            } else if (radWeekly.isSelected()) {
+                futureValue = calculateFutureValueWeekly(principal, rate, time);
+            } else if (radDaily.isSelected()) {
+                futureValue = calculateFutureValueDaily(principal, rate, time);
+            }
+
+            NumberFormat nf = NumberFormat.getCurrencyInstance();
+            DecimalFormat df = new DecimalFormat("##");
+            String message = "In " + df.format(time) + " years, your initial investment of " + nf.format(principal) + " will be worth " + nf.format(futureValue) + "\nStart investing now. Future you will thank you.";
+
+            lblInvest.setText(message);
+        }
+
+        private double calculateFutureValueAnnually(double principal, double rate, double time) {
+            return principal * Math.pow(1 + rate / 100, time);
+        }
+
+        private double calculateFutureValueMonthly(double principal, double rate, double time) {
+            return principal * Math.pow(1 + rate / (100 * 12), time * 12);
+        }
+
+        private double calculateFutureValueWeekly(double principal, double rate, double time) {
+            return principal * Math.pow(1 + rate / (100 * 52), time * 52);
+        }
+
+        private double calculateFutureValueDaily(double principal, double rate, double time) {
+            return principal * Math.pow(1 + rate / (100 * 365), time * 365);
+        }
+    }
+
+    class btnClearClickHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            txtPrpAmt.setText("");
+            txtReturnRate.setText("");
+            txtYears.setText("");
+            lblInvest.setText("");
+            
+            radAnnually.setSelected(false);
+            radMonthly.setSelected(false);
+            radWeekly.setSelected(false);
+            radDaily.setSelected(false);
+      
+        }
+        
+      } 
+    
+    class btnExitClickHandler implements EventHandler<ActionEvent>
+     {
+        @Override
+        public void handle(ActionEvent event)
+        {
+              System.exit(0);
+            
+        }
+        
+      } 
+}
