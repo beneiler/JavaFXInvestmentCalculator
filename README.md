@@ -1,1 +1,1 @@
-# JavaFXInvestmentCalculator
+Future Investment Calculator using JavaFX Application
